@@ -42,26 +42,29 @@ function thumbByWidth($src, $max_width, $max_height, $quailty = 100)
         imagefilledrectangle($dst_img, 0, 0, $max_width, $max_height, $transparent);
         $src_img = $image_create($src);
 
-        $width_new = $height * $max_width / $max_height;
-        $height_new = $width * $max_height / $max_width;
-        // if the new width is greater than the actual width of the image, then the height is too large and the rest cut off, or vice versa
+        $new_width = $width * ($max_height / $height);
+        $new_height = $height * ($max_width / $width);
+        $offset_w = ($max_width-$width)/2;
+        $offset_h = ($max_height-$height)/2;
         if($width < $max_width && $height < $max_height) {
-            $offset_w = ($max_width-$width)/2;
-            $offset_h = ($max_height-$height)/2;
             imagecopyresampled($dst_img, $src_img, $offset_w, $offset_h, 0, 0, $width, $height, $width, $height);
-            imagecreatetruecolor($max_width,$max_height);
         }
-        elseif ($width_new > $width) {
-            // cut point by height
-            $h_point = (($height - $height_new) / 2);
-            // copy image
-            imagecopyresampled($dst_img, $src_img, 0, 0, 0, $h_point, $max_width, $max_height, $width, $height_new);
+        elseif ($max_width > $width && $max_height < $height) {
+            imagecopyresampled($dst_img, $src_img, $offset_w, 0, 0, 0, $new_width, $max_height, $width, $height);
+        } elseif($max_width < $width && $max_height > $height) {
+            imagecopyresampled($dst_img, $src_img, 0, $offset_h, 0, 0, $max_width, $new_height, $width, $height);
         } else {
-            // cut point by width
-            $w_point = (($width - $width_new) / 2);
-            imagecopyresampled($dst_img, $src_img, 0, 0, $w_point, 0, $max_width, $max_height, $width_new, $height);
+            if($max_width >= $max_height) {
+                $new_width1 = $width * ($max_height / $height);
+                $offset_w1 = ($max_width - $new_width1) / 2;
+                imagecopyresampled($dst_img, $src_img, $offset_w1, 0, 0, 0, $new_width1, $max_height, $width, $height);
+            } else {
+                $new_height1 = $height * ($max_width / $width);
+                $offset_h1 = ($max_height - $new_height1) / 2;
+                imagecopyresampled($dst_img, $src_img, 0, $offset_h1, 0, 0, $max_width, $new_height1, $width, $height);
+            }
         }
-
+        imagecreatetruecolor($max_width,$max_height);
         $image($dst_img, $dst_dir, $quality);
 
         if ($dst_img)
@@ -71,4 +74,4 @@ function thumbByWidth($src, $max_width, $max_height, $quailty = 100)
     }
     return $dst_dir;
 }
-thumbByWidth('1424785052_circle-twitter-128.png',1000, 100);
+thumbByWidth('twitter.png',80, 80);
